@@ -51,12 +51,10 @@ public class DriveTrain extends Subsystem {
 	}
 
 	public void drive() {
-		leftDrive.set(0.5);
-		rightDrive1.set(0.5);
-		rightDrive2.set(0.5);
-//		leftDriveBot.set(-0.05);
-	//	rightDriveTop.set(0.05);
-//		rightDriveBot.set(-0.05);
+		leftDrive.set(-1);
+		rightDrive1.set(-1);
+		rightDrive2.set(-1);
+
 	}
 
 }

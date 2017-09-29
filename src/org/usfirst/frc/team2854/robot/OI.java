@@ -39,7 +39,12 @@ public class OI {
 	// until it is finished as determined by it's isFinished method.
 	// button.whenReleased(new ExampleCommand());
 	public static Joystick joyStick = new Joystick(0);
-	public static JoystickButton buttonA = new JoystickButton(joyStick, 1);
+	public static JoystickButton openDoorButton = new JoystickButton(joyStick, 1);
+	public static JoystickButton upGearButton = new JoystickButton(joyStick, 2);
+	public static JoystickButton downGearButton = new JoystickButton(joyStick, 3);
+	public static JoystickButton pickUpGearButton = new JoystickButton(joyStick, 4);
+	public static JoystickButton openGearButton = new JoystickButton(joyStick, 5);
+	public static JoystickButton closeGearButton = new JoystickButton(joyStick, 6);
 	
 	public static Port gyroPort = SPI.Port.kOnboardCS0;
 	

@@ -24,7 +24,7 @@ public class JoyStickDrive extends Command {
 
 	protected void execute() {
 
-		drive.drive(OI.joyStick.getRawAxis(1), OI.joyStick.getRawAxis(5));
+		drive.drive(-OI.joyStick.getRawAxis(1), -OI.joyStick.getRawAxis(5));
 	}
 
 	protected boolean isFinished() {

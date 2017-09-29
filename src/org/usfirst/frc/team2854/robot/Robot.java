@@ -3,11 +3,18 @@ package org.usfirst.frc.team2854.robot;
 
 import java.util.HashMap;
 
+import org.usfirst.frc.team2854.robot.commands.CloseGear;
 import org.usfirst.frc.team2854.robot.commands.JoyStickDrive;
-import org.usfirst.frc.team2854.robot.commands.UpdateLocation;
+import org.usfirst.frc.team2854.robot.commands.LowerGear;
+import org.usfirst.frc.team2854.robot.commands.OpenGear;
+import org.usfirst.frc.team2854.robot.commands.PickUpGear;
+import org.usfirst.frc.team2854.robot.commands.RaiseGear;
+import org.usfirst.frc.team2854.robot.commands.doors.CloseDoors;
+import org.usfirst.frc.team2854.robot.commands.doors.OpenDoors;
+import org.usfirst.frc.team2854.robot.subsystems.BottomDoor;
 import org.usfirst.frc.team2854.robot.subsystems.DriveTrain;
-import org.usfirst.frc.team2854.robot.subsystems.Intake;
-import org.usfirst.frc.team2854.robot.subsystems.LocationSystem;
+import org.usfirst.frc.team2854.robot.subsystems.Gear;
+import org.usfirst.frc.team2854.robot.subsystems.TopDoor;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -44,18 +51,21 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		
 		subSystems.put("Drive Train", new DriveTrain());
-		subSystems.put("Intake", new Intake());
-		subSystems.put("Location", new LocationSystem());
+		subSystems.put("BallDoorTop", new TopDoor());
+		subSystems.put("BallDoorBot", new BottomDoor());
+		subSystems.put("Gear", new Gear());
+		//subSystems.put("Intake", new Intake());
+		//subSystems.put("Location", new LocationSystem());
 		
-		Thread driveStreamThread = (new Thread(driveFeed = new DriveFeed()));
-		driveStreamThread.start();
+		//Thread driveStreamThread = (new Thread(driveFeed = new DriveFeed()));
+		//driveStreamThread.start();
 		
 		oi = new OI();
 		chooser.addDefault("Default Auto", new JoyStickDrive());
-		// chooser.addObject("My Auto", new MyAutoCommand());
 		SmartDashboard.putData("Auto mode", chooser);
 		
-		Scheduler.getInstance().add(new UpdateLocation());
+		
+	
 	}	
 
 	/**
@@ -106,7 +116,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		
-		driveFeed.updateData(((LocationSystem) subSystems.get("Location")).getPosition().getX(), ((LocationSystem) subSystems.get("Location")).getPosition().getY());
+		//driveFeed.updateData(((LocationSystem) subSystems.get("Location")).getPosition().getX(), ((LocationSystem) subSystems.get("Location")).getPosition().getY());
 		
 		Scheduler.getInstance().run();
 		
@@ -123,11 +133,25 @@ public class Robot extends IterativeRobot {
 			autonomousCommand.cancel();
 	}
 
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
 	@Override
 	public void teleopPeriodic() {
+
+		
+			OI.openDoorButton.whenPressed(new OpenDoors());
+			OI.openDoorButton.whenReleased(new CloseDoors());
+			OI.pickUpGearButton.whenPressed(new PickUpGear());
+			OI.upGearButton.whenPressed(new RaiseGear());
+			OI.downGearButton.whenPressed(new LowerGear());
+			OI.openGearButton.whenPressed(new OpenGear());
+			OI.closeGearButton.whenPressed(new CloseGear());
+
+		
+		SmartDashboard.putNumber("Pressure", ((BottomDoor) subSystems.get("Ball Door")).getCompress().getCompressorCurrent());
+		//driveFeed.updateData(((LocationSystem) subSystems.get("Location")).getPosition().getX(), ((LocationSystem) subSystems.get("Location")).getPosition().getY());
 		Scheduler.getInstance().run();
 	}
 
