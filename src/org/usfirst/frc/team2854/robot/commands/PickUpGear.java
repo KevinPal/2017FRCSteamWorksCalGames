@@ -1,5 +1,7 @@
 package org.usfirst.frc.team2854.robot.commands;
 
+import org.usfirst.frc.team2854.robot.GearVision;
+
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
 /**
@@ -7,12 +9,20 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
  */
 public class PickUpGear extends CommandGroup {
 
-	final double time = .5;
+
 	
-    public PickUpGear() {
-        addParallel(new DriveForwardTimed(time));
-        addSequential(new Delay(time/2f));
-        addSequential(new CloseGear());
-        addSequential(new RaiseGear());
+    public PickUpGear(GearVision vision) {
+//        addParallel(new DriveForward(time));
+//        addSequential(new Delay(time/2f));
+//        addSequential(new CloseGear());
+//        addSequential(new RaiseGear());
+    	
+    	addParallel(new OpenGear());
+    	addParallel(new LowerGear());
+    	addSequential(new DriveToGear(vision));
+    	addSequential(new DriveForward(.5));
+    	addSequential(new CloseGear());
+    	addSequential(new RaiseGear());
+    	
     }
 }

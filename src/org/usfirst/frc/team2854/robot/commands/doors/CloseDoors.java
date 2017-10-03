@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 public class CloseDoors extends CommandGroup {
 
     public CloseDoors() {
-    	addParallel(new OpenTopDoor());
-    	addParallel(new OpenBotDoor());
+    	addParallel(new CloseTopDoor());
+    	addParallel(new CloseBotDoor());
     }
 }

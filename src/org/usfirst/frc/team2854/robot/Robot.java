@@ -9,13 +9,16 @@ import org.usfirst.frc.team2854.robot.commands.LowerGear;
 import org.usfirst.frc.team2854.robot.commands.OpenGear;
 import org.usfirst.frc.team2854.robot.commands.PickUpGear;
 import org.usfirst.frc.team2854.robot.commands.RaiseGear;
-import org.usfirst.frc.team2854.robot.commands.doors.CloseDoors;
-import org.usfirst.frc.team2854.robot.commands.doors.OpenDoors;
+import org.usfirst.frc.team2854.robot.commands.doors.CloseBotDoor;
+import org.usfirst.frc.team2854.robot.commands.doors.OpenBotDoor;
 import org.usfirst.frc.team2854.robot.subsystems.BottomDoor;
 import org.usfirst.frc.team2854.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team2854.robot.subsystems.Gear;
 import org.usfirst.frc.team2854.robot.subsystems.TopDoor;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoSource;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -23,7 +26,6 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -34,44 +36,50 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 
-
 	public static OI oi;
 
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
 	DriveFeed driveFeed;
+	GearVision gearVision;
 
 	private static HashMap<String, Subsystem> subSystems = new HashMap<String, Subsystem>();
 
 	/**
-	 * This function is run when the robot is first started up and should be
-	 * used for any initialization code.
+	 * This function is run when the robot is first started up and should be used
+	 * for any initialization code.
 	 */
 	@Override
 	public void robotInit() {
-		
+
 		subSystems.put("Drive Train", new DriveTrain());
 		subSystems.put("BallDoorTop", new TopDoor());
 		subSystems.put("BallDoorBot", new BottomDoor());
 		subSystems.put("Gear", new Gear());
-		//subSystems.put("Intake", new Intake());
-		//subSystems.put("Location", new LocationSystem());
-		
-		//Thread driveStreamThread = (new Thread(driveFeed = new DriveFeed()));
-		//driveStreamThread.start();
-		
+		// subSystems.put("Intake", new Intake());
+		// subSystems.put("Location", new LocationSystem());
+
+		// Thread driveStreamThread = (new Thread(driveFeed = new DriveFeed()));
+		// driveStreamThread.start();
+
 		oi = new OI();
 		chooser.addDefault("Default Auto", new JoyStickDrive());
 		SmartDashboard.putData("Auto mode", chooser);
-		
-		
-	
-	}	
+
+		UsbCamera cam1 = CameraServer.getInstance().startAutomaticCapture(0);
+		// UsbCamera cam2 = CameraServer.getInstance().startAutomaticCapture(1);
+		gearVision = new GearVision(cam1);
+		cam1.setExposureHoldCurrent();
+		cam1.setWhiteBalanceHoldCurrent();
+		gearVision.init();
+		new Thread(gearVision).start();
+
+	}
 
 	/**
-	 * This function is called once each time the robot enters Disabled mode.
-	 * You can use it to reset any subsystem information you want to clear when
-	 * the robot is disabled.
+	 * This function is called once each time the robot enters Disabled mode. You
+	 * can use it to reset any subsystem information you want to clear when the
+	 * robot is disabled.
 	 */
 	@Override
 	public void disabledInit() {
@@ -85,24 +93,24 @@ public class Robot extends IterativeRobot {
 
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
-	 * between different autonomous modes using the dashboard. The sendable
-	 * chooser code works with the Java SmartDashboard. If you prefer the
-	 * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-	 * getString code to get the auto name from the text box below the Gyro
+	 * between different autonomous modes using the dashboard. The sendable chooser
+	 * code works with the Java SmartDashboard. If you prefer the LabVIEW Dashboard,
+	 * remove all of the chooser code and uncomment the getString code to get the
+	 * auto name from the text box below the Gyro
 	 *
 	 * You can add additional auto modes by adding additional commands to the
-	 * chooser code above (like the commented example) or additional comparisons
-	 * to the switch structure below with additional strings & commands.
+	 * chooser code above (like the commented example) or additional comparisons to
+	 * the switch structure below with additional strings & commands.
 	 */
 	@Override
 	public void autonomousInit() {
 		autonomousCommand = chooser.getSelected();
 
 		/*
-		 * String autoSelected = SmartDashboard.getString("Auto Selector",
-		 * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-		 * = new MyAutoCommand(); break; case "Default Auto": default:
-		 * autonomousCommand = new ExampleCommand(); break; }
+		 * String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
+		 * switch(autoSelected) { case "My Auto": autonomousCommand = new
+		 * MyAutoCommand(); break; case "Default Auto": default: autonomousCommand = new
+		 * ExampleCommand(); break; }
 		 */
 
 		// schedule the autonomous command (example)
@@ -115,12 +123,13 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		
-		//driveFeed.updateData(((LocationSystem) subSystems.get("Location")).getPosition().getX(), ((LocationSystem) subSystems.get("Location")).getPosition().getY());
-		
+
+		// driveFeed.updateData(((LocationSystem)
+		// subSystems.get("Location")).getPosition().getX(), ((LocationSystem)
+		// subSystems.get("Location")).getPosition().getY());
+
 		Scheduler.getInstance().run();
-		
-	
+
 	}
 
 	@Override
@@ -129,29 +138,39 @@ public class Robot extends IterativeRobot {
 		// teleop starts running. If you want the autonomous to
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
+
+		// UsbCamera cam0 = CameraServer.getInstance().startAutomaticCapture();
+		// SmartDashboard.putString("Camera Value", "[" + cam0.getPath() + "]");
+
 		if (autonomousCommand != null)
 			autonomousCommand.cancel();
 	}
 
-	
 	/**
 	 * This function is called periodically during operator control
 	 */
 	@Override
 	public void teleopPeriodic() {
 
-		
-			OI.openDoorButton.whenPressed(new OpenDoors());
-			OI.openDoorButton.whenReleased(new CloseDoors());
-			OI.pickUpGearButton.whenPressed(new PickUpGear());
-			OI.upGearButton.whenPressed(new RaiseGear());
-			OI.downGearButton.whenPressed(new LowerGear());
-			OI.openGearButton.whenPressed(new OpenGear());
-			OI.closeGearButton.whenPressed(new CloseGear());
+		OI.openDoorButton.whenPressed(new OpenBotDoor());
+		OI.openDoorButton.whenReleased(new CloseBotDoor());
+		OI.pickUpGearButton.whenPressed(new PickUpGear(gearVision));
+		OI.upGearButton.whenPressed(new RaiseGear());
+		OI.downGearButton.whenPressed(new LowerGear());
+		OI.openGearButton.whenPressed(new OpenGear());
+		OI.closeGearButton.whenPressed(new CloseGear());
+		if (OI.joyStick.getMagnitude() > .4) {
+			Scheduler.getInstance().add(new JoyStickDrive());
+		}
 
-		
-		SmartDashboard.putNumber("Pressure", ((BottomDoor) subSystems.get("Ball Door")).getCompress().getCompressorCurrent());
-		//driveFeed.updateData(((LocationSystem) subSystems.get("Location")).getPosition().getX(), ((LocationSystem) subSystems.get("Location")).getPosition().getY());
+		SmartDashboard.putString("Gear Pos", gearVision.getGearPos().toString());
+		SmartDashboard.putBoolean("Has Gear", gearVision.hasGear());
+		SmartDashboard.putNumber("Rand", Math.random());
+		SmartDashboard.putNumber("Pressure",
+				((BottomDoor) subSystems.get("BallDoorBot")).getCompress().getCompressorCurrent());
+		// driveFeed.updateData(((LocationSystem)
+		// subSystems.get("Location")).getPosition().getX(), ((LocationSystem)
+		// subSystems.get("Location")).getPosition().getY());
 		Scheduler.getInstance().run();
 	}
 

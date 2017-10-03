@@ -14,7 +14,7 @@ public class TopDoor extends Subsystem {
     private DoubleSolenoid door;
     
     public TopDoor() {
-    	door = new DoubleSolenoid(RobotMap.doorPiston1Open, RobotMap.doorPiston1Close);
+    	door = new DoubleSolenoid(RobotMap.doorPiston2Open, RobotMap.doorPiston2Close);
     
     }
 

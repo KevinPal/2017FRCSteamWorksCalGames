@@ -1,17 +1,9 @@
 package org.usfirst.frc.team2854.robot.subsystems;
 
-import org.usfirst.frc.team2854.robot.Robot;
 import org.usfirst.frc.team2854.robot.RobotMap;
 import org.usfirst.frc.team2854.robot.commands.JoyStickDrive;
 
-import edu.wpi.first.wpilibj.BuiltInAccelerometer;
-import edu.wpi.first.wpilibj.GyroBase;
-import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.hal.AccelerometerJNI;
-
 import com.ctre.*;
 
 /**
@@ -24,10 +16,8 @@ public class DriveTrain extends Subsystem {
 
 	public CANTalon leftDrive, rightDrive1, rightDrive2;
 
-	
-
 	public void initDefaultCommand() {
-		setDefaultCommand(new JoyStickDrive());	
+		setDefaultCommand(new JoyStickDrive());
 	}
 
 	public DriveTrain() {
@@ -36,24 +26,29 @@ public class DriveTrain extends Subsystem {
 		rightDrive2 = new CANTalon(RobotMap.rightDrive2);
 		rightDrive1.setInverted(true);
 		rightDrive2.setInverted(true);
-;
 
 	}
 
 	public void drive(double x, double y) {
-		
+
 		leftDrive.set(-x);
-		//leftDriveBot.set(x);
+		// leftDriveBot.set(x);
 		rightDrive1.set(-y);
-		rightDrive2.set(-y);
+		// rightDrive2.set(-y);
 		// rightDriveBot.set(y);
-		
+
+	}
+
+	public void stop() {
+		leftDrive.set(0);
+		rightDrive1.set(0);
+		// rightDrive2.set(0);
 	}
 
 	public void drive() {
-		leftDrive.set(-1);
-		rightDrive1.set(-1);
-		rightDrive2.set(-1);
+		leftDrive.set(-.25);
+		rightDrive1.set(-.25);
+		// rightDrive2.set(-.25);
 
 	}
 

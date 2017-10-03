@@ -26,7 +26,7 @@ public class OpenGear extends Command {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-        	gear.getGearHold().set(Value.kForward);
+        	gear.getGearHold().set(Value.kReverse);
     
     }
 

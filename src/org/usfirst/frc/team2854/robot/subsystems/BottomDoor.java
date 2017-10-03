@@ -21,7 +21,7 @@ public class BottomDoor extends Subsystem {
     	compress = new Compressor();
     	compress.setClosedLoopControl(true);
     	//door1 = new DoubleSolenoid(RobotMap.doorPiston1Open, RobotMap.doorPiston1Close);
-    	door = new DoubleSolenoid(RobotMap.doorPiston2Open, RobotMap.doorPiston2Close);
+    	door = new DoubleSolenoid(RobotMap.doorPiston1Open, RobotMap.doorPiston1Close);
     
     }
 
