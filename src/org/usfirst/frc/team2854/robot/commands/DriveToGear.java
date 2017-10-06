@@ -26,19 +26,25 @@ public class DriveToGear extends Command {
     // Called just before this Command runs the first time
     protected void initialize() {
     	driveTrain = (DriveTrain)Robot.getSubSystems().get("Drive Train");
-        vision.setRunning(true);
+		vision.setRunning(true);
+		vision.setFinished(false);
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	
+    		//System.out.println("Is Running? "  + vision.getGearPos());
+    		while(!vision.isFinished()) {
+    			System.out.println("Waiting for finish");
+    		}
+    		
+    		
     		double leftDrive = 1, rightDrive = 1;
     		double gearPos = vision.getGearPos().getX();
     		if(gearPos > 0) {
     			rightDrive = 1 - gearPos;
     		} else if(gearPos < 0) {
     			leftDrive = 1 + gearPos;
-    		}
+    		}	
     		leftDrive *= testMultiplier;
     		rightDrive *= testMultiplier;
     		driveTrain.drive(rightDrive, leftDrive);
@@ -54,6 +60,7 @@ public class DriveToGear extends Command {
     protected void end() {
     	driveTrain.stop();
     	vision.setRunning(false);
+    	
     }
 
     // Called when another command which requires one or more of the same

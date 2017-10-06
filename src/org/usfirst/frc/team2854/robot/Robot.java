@@ -12,13 +12,16 @@ import org.usfirst.frc.team2854.robot.commands.RaiseGear;
 import org.usfirst.frc.team2854.robot.commands.doors.CloseBotDoor;
 import org.usfirst.frc.team2854.robot.commands.doors.OpenBotDoor;
 import org.usfirst.frc.team2854.robot.subsystems.BottomDoor;
+import org.usfirst.frc.team2854.robot.subsystems.Climb;
 import org.usfirst.frc.team2854.robot.subsystems.DriveTrain;
 import org.usfirst.frc.team2854.robot.subsystems.Gear;
+import org.usfirst.frc.team2854.robot.subsystems.Intake;
 import org.usfirst.frc.team2854.robot.subsystems.TopDoor;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -42,6 +45,9 @@ public class Robot extends IterativeRobot {
 	SendableChooser<Command> chooser = new SendableChooser<>();
 	DriveFeed driveFeed;
 	GearVision gearVision;
+	Thread visionThread;
+	
+	Encoder e;
 
 	private static HashMap<String, Subsystem> subSystems = new HashMap<String, Subsystem>();
 
@@ -56,7 +62,8 @@ public class Robot extends IterativeRobot {
 		subSystems.put("BallDoorTop", new TopDoor());
 		subSystems.put("BallDoorBot", new BottomDoor());
 		subSystems.put("Gear", new Gear());
-		// subSystems.put("Intake", new Intake());
+		 subSystems.put("Intake", new Intake());
+		 subSystems.put("Climb", new Climb());
 		// subSystems.put("Location", new LocationSystem());
 
 		// Thread driveStreamThread = (new Thread(driveFeed = new DriveFeed()));
@@ -69,10 +76,12 @@ public class Robot extends IterativeRobot {
 		UsbCamera cam1 = CameraServer.getInstance().startAutomaticCapture(0);
 		// UsbCamera cam2 = CameraServer.getInstance().startAutomaticCapture(1);
 		gearVision = new GearVision(cam1);
-		cam1.setExposureHoldCurrent();
-		cam1.setWhiteBalanceHoldCurrent();
+	//	cam1.setExposureHoldCurrent();
+	//	cam1.setWhiteBalanceHoldCurrent();
 		gearVision.init();
-		new Thread(gearVision).start();
+		visionThread = new Thread(gearVision);
+		visionThread.start();
+		
 
 	}
 
@@ -83,7 +92,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void disabledInit() {
-
+		
 	}
 
 	@Override
@@ -134,6 +143,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		
 		// This makes sure that the autonomous stops running when
 		// teleop starts running. If you want the autonomous to
 		// continue until interrupted by another command, remove
@@ -152,17 +162,21 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 
-		OI.openDoorButton.whenPressed(new OpenBotDoor());
-		OI.openDoorButton.whenReleased(new CloseBotDoor());
-		OI.pickUpGearButton.whenPressed(new PickUpGear(gearVision));
-		OI.upGearButton.whenPressed(new RaiseGear());
-		OI.downGearButton.whenPressed(new LowerGear());
-		OI.openGearButton.whenPressed(new OpenGear());
-		OI.closeGearButton.whenPressed(new CloseGear());
+		OI.openBallDoor.whenPressed(new OpenBotDoor());
+		OI.openBallDoor.whenReleased(new CloseBotDoor());
+		OI.pickUpGear.whenPressed(new PickUpGear(gearVision));
+		OI.raiseGear.whenPressed(new RaiseGear());
+		OI.lowerGear.whenPressed(new LowerGear());
+		OI.openGear.whenPressed(new OpenGear());
+		OI.closeGear.whenPressed(new CloseGear());
+		//OI.toggleIntakeButton.whenPressed(new ToggleIntake());
 		if (OI.joyStick.getMagnitude() > .4) {
 			Scheduler.getInstance().add(new JoyStickDrive());
 		}
-
+		System.gc();
+		
+		SmartDashboard.putNumber("Left Encoder", ((DriveTrain)( Robot.getSubSystems().get("Drive Train"))).getLeftEncoder());
+		SmartDashboard.putNumber("Right Encoder", ((DriveTrain)( Robot.getSubSystems().get("Drive Train"))).getRightEncoder());
 		SmartDashboard.putString("Gear Pos", gearVision.getGearPos().toString());
 		SmartDashboard.putBoolean("Has Gear", gearVision.hasGear());
 		SmartDashboard.putNumber("Rand", Math.random());
@@ -173,6 +187,8 @@ public class Robot extends IterativeRobot {
 		// subSystems.get("Location")).getPosition().getY());
 		Scheduler.getInstance().run();
 	}
+	
+
 
 	/**
 	 * This function is called periodically during test mode
@@ -181,6 +197,8 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		LiveWindow.run();
 	}
+	
+	
 
 	public static HashMap<String, Subsystem> getSubSystems() {
 		return subSystems;

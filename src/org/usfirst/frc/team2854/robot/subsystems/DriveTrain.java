@@ -14,7 +14,7 @@ public class DriveTrain extends Subsystem {
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.
 
-	public CANTalon leftDrive, rightDrive1, rightDrive2;
+	private CANTalon leftDrive, rightDrive1, rightDrive2;
 
 	public void initDefaultCommand() {
 		setDefaultCommand(new JoyStickDrive());
@@ -26,6 +26,7 @@ public class DriveTrain extends Subsystem {
 		rightDrive2 = new CANTalon(RobotMap.rightDrive2);
 		rightDrive1.setInverted(true);
 		rightDrive2.setInverted(true);
+		
 
 	}
 
@@ -50,6 +51,12 @@ public class DriveTrain extends Subsystem {
 		rightDrive1.set(-.25);
 		// rightDrive2.set(-.25);
 
+	}
+	public int getLeftEncoder() {
+		return leftDrive.getEncPosition();
+	}
+	public int getRightEncoder() {
+		return rightDrive2.getEncPosition();
 	}
 
 }

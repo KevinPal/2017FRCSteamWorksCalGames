@@ -20,7 +20,7 @@ public class PickUpGear extends CommandGroup {
     	addParallel(new OpenGear());
     	addParallel(new LowerGear());
     	addSequential(new DriveToGear(vision));
-    	addSequential(new DriveForward(.5));
+    	addSequential(new DriveForward(.05));
     	addSequential(new CloseGear());
     	addSequential(new RaiseGear());
     	

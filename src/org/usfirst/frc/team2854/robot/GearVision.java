@@ -39,8 +39,9 @@ public class GearVision implements Runnable {
 	private UsbCamera cam;
 
 	private boolean shouldRun = true;
-	
-	private boolean running = false;
+
+	private volatile boolean running = false;
+	private boolean finished = false;
 
 	public GearVision(UsbCamera camera) {
 
@@ -54,7 +55,7 @@ public class GearVision implements Runnable {
 	}
 
 	public void init() {
-	
+
 		cvSink.grabFrame(bgImg);
 		bgImg.convertTo(bgImg, CvType.CV_8U);
 		Imgproc.cvtColor(bgImg, bgImg, Imgproc.COLOR_RGB2HSV);
@@ -67,97 +68,109 @@ public class GearVision implements Runnable {
 	@Override
 	public void run() {
 
-
 		System.gc();
 		if (!isReady) {
 			throw new RuntimeException("BG was not ready, call the init function to take a bg pic");
-		}
+		}	
+
 		while (!Thread.interrupted()) {
-			SmartDashboard.putBoolean("Is CV Running", running);
-			if(!running) {
-				Mat m = new Mat();
-				cvSink.grabFrame(m);
-				outputStream.putFrame(m);
-				continue;
-			}
-			if (!shouldRun) {
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			//System.out.println("In Gear Vision: " + running);
+			try {
+				SmartDashboard.putBoolean("Is CV Running", running);
+			
+				if (!running) {
+					
+					Mat m = new Mat();
+					cvSink.grabFrame(m);
+					outputStream.putFrame(m);
+					m.release();
+					continue;
 				}
-				shouldRun = true;
-				continue;
-			} else {
-				shouldRun = false;
-			}
-			cvSink.grabFrame(source);
-			SmartDashboard.putString("Memory", "Free Mem " + Runtime.getRuntime().freeMemory() + " Total Memory: "
-					+ Runtime.getRuntime().totalMemory() + " Max Memory: " + Runtime.getRuntime().maxMemory());
+//				if (!shouldRun) {
+//					try {
+//						Thread.sleep(10);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					shouldRun = true;
+//					continue;
+//				} else {
+//					shouldRun = false;
+//				}
+				cvSink.grabFrame(source);
+				SmartDashboard.putString("Memory", "Free Mem " + Runtime.getRuntime().freeMemory() + " Total Memory: "
+						+ Runtime.getRuntime().totalMemory() + " Max Memory: " + Runtime.getRuntime().maxMemory());
+				
+				source.convertTo(source, CvType.CV_8U);
+				Imgproc.cvtColor(source, source, Imgproc.COLOR_RGB2HSV);
+				Imgproc.medianBlur(source, source, 11);
+				
+				Mat gearHist = getHistogram(source, true, 300, 300, 180).get(0);
+				
+				Mat subtract = new Mat();
 
-			source.convertTo(source, CvType.CV_8U);
-			Imgproc.cvtColor(source, source, Imgproc.COLOR_RGB2HSV);
-			Imgproc.medianBlur(source, source, 11);
+				Core.subtract(gearHist, bgHist, subtract);
+				List<Double> spikes = findSpikes(subtract);
+				subtract.release();
+				gearHist.release();
 
-			Mat gearHist = getHistogram(source, true, 300, 300, 180).get(0);
+				Mat threshHold = new Mat();
+				// System.out.println(spikes);
+				for (double spike : spikes) {
+					
+					Scalar lower = new Scalar(spike - 10, 100, 100);
+					Scalar upper = new Scalar(spike + 10, 255, 255);
+					
+					Core.inRange(source, lower, upper, threshHold);
 
-			Mat subtract = new Mat();
+					ArrayList<MatOfPoint> contour = new ArrayList<MatOfPoint>();
+					Mat heirarchy = new Mat();
+					Imgproc.findContours(threshHold, contour, heirarchy, Imgproc.RETR_EXTERNAL,
+							Imgproc.CHAIN_APPROX_SIMPLE);
+					// System.out.println(contour.size());
+					ArrayList<Vector> gears = new ArrayList<Vector>();
+					hasGear = false;
+					for (int i = 0; i < contour.size(); i++) {
+						Rect boundingRect = Imgproc.boundingRect(contour.get(i));
+						Imgproc.rectangle(source, boundingRect.tl(), boundingRect.br(), new Scalar(255, 0, 0), 1);
+						String text;
+						if (spike < gearHue + range && spike > gearHue - range) {
+							text = "Gear";
+							hasGear = true;
 
-			Core.subtract(gearHist, bgHist, subtract);
-			List<Double> spikes = findSpikes(subtract);
+							gears.add((new Vector((boundingRect.tl().x + boundingRect.br().x) / 2d,
+									(boundingRect.tl().y + boundingRect.br().y) / 2d)
+											.multiply(new Vector(1d / source.cols(), 1d / source.rows()))).subtract(.5)
+													.multiply(2));
 
-			Mat threshHold = new Mat();
-			// System.out.println(spikes);
-			for (double spike : spikes) {
-
-				Scalar lower = new Scalar(spike - 10, 100, 100);
-				Scalar upper = new Scalar(spike + 10, 255, 255);
-
-				Core.inRange(source, lower, upper, threshHold);
-
-				List<MatOfPoint> contour = new ArrayList<MatOfPoint>();
-				Mat heirarchy = new Mat();
-				Imgproc.findContours(threshHold, contour, heirarchy, Imgproc.RETR_EXTERNAL,
-						Imgproc.CHAIN_APPROX_SIMPLE);
-				// System.out.println(contour.size());
-				ArrayList<Vector> gears = new ArrayList<Vector>();
-				hasGear = false;
-				for (int i = 0; i < contour.size(); i++) {
-					Rect boundingRect = Imgproc.boundingRect(contour.get(i));
-					Imgproc.rectangle(source, boundingRect.tl(), boundingRect.br(), new Scalar(255, 0, 0), 1);
-					String text;
-					if (spike < gearHue + range && spike > gearHue - range) {
-						text = "Gear";
-						hasGear = true;
-
-						gears.add((new Vector((boundingRect.tl().x + boundingRect.br().x) / 2d,
-								(boundingRect.tl().y + boundingRect.br().y) / 2d)
-										.multiply(new Vector(1d / source.cols(), 1d / source.rows()))).subtract(.5)
-												.multiply(2));
-
-					} else if (spike < ballHue + range && spike > ballHue - range) {
-						text = "Ball";
-					} else {
-						text = "Other";
-					}
-					Point textLocation = new Point(boundingRect.tl().x,
-							(boundingRect.tl().y + boundingRect.br().y) / 2d);
-					Imgproc.putText(source, text, textLocation, Core.FONT_HERSHEY_PLAIN, 1 / 2d, new Scalar(0, 0, 0));
-				}
-				if (hasGear) {
-					Vector min = new Vector(0, 10);
-					for (Vector v : gears) {
-						if (v.getY() < min.getY()) {
-							min = v;
+						} else if (spike < ballHue + range && spike > ballHue - range) {
+							text = "Ball";
+						} else {
+							text = "Other";
 						}
+						Point textLocation = new Point(boundingRect.tl().x,
+								(boundingRect.tl().y + boundingRect.br().y) / 2d);
+						Imgproc.putText(source, text, textLocation, Core.FONT_HERSHEY_PLAIN, 1 / 2d,
+								new Scalar(0, 0, 0));
+						
 					}
-					gearPos = min;
+					if (hasGear) {
+						Vector min = new Vector(0, 10);
+						for (Vector v : gears) {
+							if (v.getY() < min.getY()) {
+								min = v;
+							}
+						}
+						gearPos = min;
+					}
 				}
+
+				outputStream.putFrame(source);
+				finished = true;
+			} catch (Exception e) {
+				System.out.println("*********ERROR: ****" + e.getMessage());
 			}
-
-			outputStream.putFrame(source);
-
 		}
 	}
 
@@ -210,22 +223,32 @@ public class GearVision implements Runnable {
 		return Math.sqrt(devations / (hist.rows() - 1));
 
 	}
+	
+
 
 	private List<Mat> getHistogram(Mat frame, boolean gray, int hist_w, int hist_h, int range) {
 
-		List<Mat> images = new ArrayList<Mat>();
-		Core.split(frame, images);
-
+		List<Mat> images;
 		MatOfInt histSize = new MatOfInt(range);
 		MatOfInt channels = new MatOfInt(0);
 		MatOfFloat histRange = new MatOfFloat(0, range);
+		Mat hist_b;
 
-		Mat hist_b = new Mat();
+		Mat hist_g;
+		Mat hist_r;
+		Mat histImage;
+		
+		images = new ArrayList<Mat>();
+		Core.split(frame, images);
 
-		Mat hist_g = new Mat();
-		Mat hist_r = new Mat();
 
-		Mat histImage = new Mat(hist_h, hist_w, CvType.CV_8U, new Scalar(0, 0, 0));
+
+		 hist_b = new Mat();
+
+		 hist_g = new Mat();
+		 hist_r = new Mat();
+
+		histImage = new Mat(hist_h, hist_w, CvType.CV_8U, new Scalar(0, 0, 0));
 
 		Imgproc.calcHist(images.subList(0, 1), channels, new Mat(), hist_b, histSize, histRange, false);
 
@@ -325,8 +348,16 @@ public class GearVision implements Runnable {
 		return running;
 	}
 
-	public void setRunning(boolean running) {
+	public synchronized void setRunning(boolean running) {
 		this.running = running;
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(boolean finished) {
+		this.finished = finished;
 	}
 
 }

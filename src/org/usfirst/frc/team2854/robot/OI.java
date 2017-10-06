@@ -39,12 +39,22 @@ public class OI {
 	// until it is finished as determined by it's isFinished method.
 	// button.whenReleased(new ExampleCommand());
 	public static Joystick joyStick = new Joystick(0);
-	public static JoystickButton openDoorButton = new JoystickButton(joyStick, 1);
-	public static JoystickButton upGearButton = new JoystickButton(joyStick, 2);
-	public static JoystickButton downGearButton = new JoystickButton(joyStick, 3);
-	public static JoystickButton pickUpGearButton = new JoystickButton(joyStick, 4);
-	public static JoystickButton openGearButton = new JoystickButton(joyStick, 5);
-	public static JoystickButton closeGearButton = new JoystickButton(joyStick, 6);
+	public static Joystick joyStick1 = new Joystick(1);
+	
+	public static JoystickButton lowerGear = new JoystickButton(joyStick1, 1);
+	public static JoystickButton openBallDoor = new JoystickButton(joyStick1, 2);
+	public static JoystickButton raiseGear = new JoystickButton(joyStick1, 3);
+	public static JoystickButton pickUpGear = new JoystickButton(joyStick1, 4);
+	public static JoystickButton closeGear = new JoystickButton(joyStick1, 5);
+	public static JoystickButton openGear = new JoystickButton(joyStick1, 6);
+	
+//	public static JoystickButton openDoorButton = new JoystickButton(joyStick, 1);
+//	public static JoystickButton upGearButton = new JoystickButton(joyStick, 2);
+//	public static JoystickButton downGearButton = new JoystickButton(joyStick, 3);
+//	public static JoystickButton pickUpGearButton = new JoystickButton(joyStick, 4);
+//	public static JoystickButton openGearButton = new JoystickButton(joyStick, 5);
+//	public static JoystickButton closeGearButton = new JoystickButton(joyStick, 6);
+//	public static JoystickButton toggleIntakeButton = new JoystickButton(joyStick, 10);
 	
 	public static Port gyroPort = SPI.Port.kOnboardCS0;
 	
