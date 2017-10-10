@@ -13,7 +13,7 @@ public class DriveToGear extends Command {
 
 	private GearVision vision;
 	private DriveTrain driveTrain;
-	private final double testMultiplier = .4;
+	private final double testMultiplier = .2;
 	private final double lowerGearBound = .55;
 	
     public DriveToGear(GearVision vision) {
@@ -47,7 +47,7 @@ public class DriveToGear extends Command {
     		}	
     		leftDrive *= testMultiplier;
     		rightDrive *= testMultiplier;
-    		driveTrain.drive(rightDrive, leftDrive);
+    		driveTrain.drive(-leftDrive, -rightDrive);
     	
     }
 
