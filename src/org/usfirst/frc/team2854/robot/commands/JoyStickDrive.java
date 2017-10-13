@@ -29,9 +29,10 @@ public class JoyStickDrive extends Command {
 		double turn = sigmoid(OI.joyStick.getRawAxis(0)/1.5f);
 		left -= turn;
 		right += turn;
+		//System.out.println(turn);
 		drive.drive(left, right);
-//		SmartDashboard.putNumber("Left stick", OI.joyStick.getRawAxis(1));
-//		SmartDashboard.putNumber("Right stick", OI.joyStick.getRawAxis(5));
+		SmartDashboard.putNumber("Left stick", OI.joyStick.getRawAxis(1));
+		SmartDashboard.putNumber("Right stick", OI.joyStick.getRawAxis(5));
 	}
 	
 	private double sigmoid(double value) {

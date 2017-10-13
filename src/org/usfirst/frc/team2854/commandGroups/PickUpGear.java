@@ -1,6 +1,12 @@
-package org.usfirst.frc.team2854.robot.commands;
+package org.usfirst.frc.team2854.commandGroups;
 
 import org.usfirst.frc.team2854.robot.GearVision;
+import org.usfirst.frc.team2854.robot.commands.CloseGear;
+import org.usfirst.frc.team2854.robot.commands.DriveForward;
+import org.usfirst.frc.team2854.robot.commands.DriveToGear;
+import org.usfirst.frc.team2854.robot.commands.LowerGear;
+import org.usfirst.frc.team2854.robot.commands.OpenGear;
+import org.usfirst.frc.team2854.robot.commands.RaiseGear;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
