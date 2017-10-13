@@ -3,15 +3,14 @@ package org.usfirst.frc.team2854.robot;
 
 import java.util.HashMap;
 
+import org.usfirst.frc.team2854.commandGroups.BallDumpAuto;
 import org.usfirst.frc.team2854.commandGroups.CenterAuto;
-import org.usfirst.frc.team2854.commandGroups.LeftAuto;
 import org.usfirst.frc.team2854.commandGroups.PickUpGear;
+import org.usfirst.frc.team2854.commandGroups.SideBaseLineAuto;
 import org.usfirst.frc.team2854.robot.commands.CloseGear;
 import org.usfirst.frc.team2854.robot.commands.DriveStraight;
-import org.usfirst.frc.team2854.robot.commands.JoyStickDrive;
 import org.usfirst.frc.team2854.robot.commands.LowerGear;
 import org.usfirst.frc.team2854.robot.commands.OpenGear;
-import org.usfirst.frc.team2854.robot.commands.RaiseGear;
 import org.usfirst.frc.team2854.robot.commands.doors.CloseBotDoor;
 import org.usfirst.frc.team2854.robot.commands.doors.OpenBotDoor;
 import org.usfirst.frc.team2854.robot.subsystems.BottomDoor;
@@ -22,10 +21,9 @@ import org.usfirst.frc.team2854.robot.subsystems.Intake;
 import org.usfirst.frc.team2854.robot.subsystems.TopDoor;
 
 import edu.wpi.cscore.UsbCamera;
-import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -75,13 +73,15 @@ public class Robot extends IterativeRobot {
 
 		oi = new OI();
 		chooser.addDefault("Default Auto", new CenterAuto());
+		chooser.addObject("Ball Dump Auto", new BallDumpAuto());
+		chooser.addObject("Base Line Auto", new SideBaseLineAuto());
 		//chooser.addObject("Left Auto", new LeftAuto());
 		
 		SmartDashboard.putData(Scheduler.getInstance());
 //		for (Subsystem s : subSystems.values()) {
 //			SmartDashboard.putData(s);
 //		}
-		SmartDashboard.putData("Drive Straight", new DriveStraight(11 * 12, true));
+	//	SmartDashboard.putData("Drive Straight", new DriveStraight(11 * 12, true, .6));
 		UsbCamera cam1 = CameraServer.getInstance().startAutomaticCapture(0);
 		UsbCamera cam2 = CameraServer.getInstance().startAutomaticCapture(1);
 		gearVision = new GearVision(cam1);
@@ -92,6 +92,7 @@ public class Robot extends IterativeRobot {
 		visionThread = new Thread(gearVision);
 		visionThread.start();
 		gyro = new MyGyro();
+		
 	}
 
 	/**
@@ -176,7 +177,7 @@ public class Robot extends IterativeRobot {
 		OI.openBallDoor.whenPressed(new OpenBotDoor());
 		OI.openBallDoor.whenReleased(new CloseBotDoor());
 		OI.pickUpGear.whenPressed(new PickUpGear(gearVision));
-		OI.raiseGear.whenPressed(new LeftAuto());
+		OI.raiseGear.whenPressed(new BallDumpAuto());
 		OI.lowerGear.whenPressed(new LowerGear());
 		OI.openGear.whenPressed(new OpenGear());
 		OI.closeGear.whenPressed(new CloseGear());
@@ -186,16 +187,16 @@ public class Robot extends IterativeRobot {
 		// }
 		// System.gc();
 		gyro.run();
-		SmartDashboard.putNumber("Acc X", acc.getX());
-		SmartDashboard.putNumber("Acc Y", acc.getY());
-		SmartDashboard.putNumber("Acc Z", acc.getZ());
-
+//		SmartDashboard.putNumber("Acc X", acc.getX());
+//		SmartDashboard.putNumber("Acc Y", acc.getY());
+//		SmartDashboard.putNumber("Acc Z", acc.getZ());
+		SmartDashboard.putBoolean("Is Gear Holding", ((Gear)(getSubSystems().get("Gear"))).getGearHold().get().equals(Value.kForward));
 		SmartDashboard.putNumber("Left Encoder",
 				((DriveTrain) (Robot.getSubSystems().get("Drive Train"))).getLeftEncoder());
-		SmartDashboard.putNumber("Right Encoder",
-				-((DriveTrain) (Robot.getSubSystems().get("Drive Train"))).getRightEncoder());
-		SmartDashboard.putString("Gear Pos", gearVision.getGearPos().toString());
-		SmartDashboard.putBoolean("Has Gear", gearVision.hasGear());
+//		SmartDashboard.putNumber("Right Encoder",
+//				-((DriveTrain) (Robot.getSubSystems().get("Drive Train"))).getRightEncoder());
+//		SmartDashboard.putString("Gear Pos", gearVision.getGearPos().toString());
+//		SmartDashboard.putBoolean("Has Gear", gearVision.hasGear());
 		SmartDashboard.putNumber("Rand", Math.random());
 		SmartDashboard.putNumber("Pressure",
 				((BottomDoor) subSystems.get("BallDoorBot")).getCompress().getCompressorCurrent());

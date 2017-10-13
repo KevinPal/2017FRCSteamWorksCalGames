@@ -23,10 +23,11 @@ public class DriveStraight extends Command {
 	private long startTime, lastTime;
 	double a = 0, v = 0, p = 0;
 	
-	public DriveStraight(double distance, boolean forward) {
+	public DriveStraight(double distance, boolean forward, double speed) {
 		requires(Robot.getSubSystems().get("Drive Train"));
 		this.distance = distance;
 		this.forward = forward;
+		this.speed = speed;
 	}
 
 	// Called just before this Command runs the first time

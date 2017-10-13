@@ -21,8 +21,8 @@ public class Gear extends Subsystem {
     public Gear() {
     	gearLift = new DoubleSolenoid(RobotMap.gearUp, RobotMap.gearDown);
     	gearHold = new DoubleSolenoid(RobotMap.gearOpen, RobotMap.gearClose);
-    	SmartDashboard.putData("Gear Hold", gearHold);
-    	SmartDashboard.putData("Gear Lift", gearLift);
+    	//SmartDashboard.putData("Gear Hold", gearHold);
+    	//SmartDashboard.putData("Gear Lift", gearLift);
     }
 
 	public DoubleSolenoid getGearLift() {

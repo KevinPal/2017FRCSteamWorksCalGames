@@ -17,10 +17,10 @@ public class CenterAuto extends CommandGroup {
     public CenterAuto() {
     	addSequential(new CloseGear());
         addSequential(new RaiseGear());
-        addSequential(new DriveStraight(11 * 12, true));
+        addSequential(new DriveStraight(93.25, true, .4));
         addSequential(new Delay(2d));
         addSequential(new OpenGear());
         addSequential(new LowerGear());
-        addSequential(new DriveStraight(10d, false));
+        addSequential(new DriveStraight(10d, false, .5));
     }
 }

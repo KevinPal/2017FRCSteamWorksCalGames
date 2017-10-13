@@ -13,7 +13,7 @@ public class Turn extends Command {
 
 	private double angle;
 	private DriveTrain drive;
-	private double turnSpeed = .6;
+	private double turnSpeed = .3;
 	private MyGyro gyro;
 	
 	

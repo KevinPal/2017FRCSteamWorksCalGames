@@ -74,10 +74,10 @@ public class DriveTrain extends Subsystem {
 		rightDrive1.set(x);
 		rightDrive2.set(x);
 		
-		SmartDashboard.putNumber("Left Drive 1", leftDrive1.get());
-		SmartDashboard.putNumber("Left Drive 2", leftDrive2.get());
-		SmartDashboard.putNumber("Right Drive 1", rightDrive1.get());
-		SmartDashboard.putNumber("Right Drive 2", rightDrive2.get());
+//		SmartDashboard.putNumber("Left Drive 1", leftDrive1.get());
+//		SmartDashboard.putNumber("Left Drive 2", leftDrive2.get());
+//		SmartDashboard.putNumber("Right Drive 1", rightDrive1.get());
+//		SmartDashboard.putNumber("Right Drive 2", rightDrive2.get());
 		//rightDrive1.setControlMode(TalonControlMode.);
 		// rightDriveBot.set(y);
 		//Mat output = new Mat(500, 500, CvType.CV_8UC3, new Scalar(0, 255, 0));
