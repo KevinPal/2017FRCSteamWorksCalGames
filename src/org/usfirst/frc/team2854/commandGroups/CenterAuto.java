@@ -22,5 +22,6 @@ public class CenterAuto extends CommandGroup {
         addSequential(new OpenGear());
         addSequential(new LowerGear());
         addSequential(new DriveStraight(10d, false, .5));
+        
     }
 }
